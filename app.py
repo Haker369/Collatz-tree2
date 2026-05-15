@@ -94,11 +94,11 @@ class HybridControl(QWidget):
 
     def update_indicator(self, val):
         if abs(val - self.min_v) < 0.1:
-            color = "#dc3545" # Красный - Мин
+            color = "#dc3545"
         elif abs(val - self.max_v) < 0.1:
-            color = "#28a745" # Зеленый - Макс
+            color = "#28a745"
         else:
-            color = "#ffc107" # Желтый - Середина
+            color = "#ffc107"
         self.indicator.setStyleSheet(f"background-color: {color}; border-radius: 5px;")
 
 
@@ -111,11 +111,9 @@ class FractalApp(QMainWindow):
         main_widget = QWidget()
         main_layout = QHBoxLayout()
         
-        # Левая панель управления
         control_panel = QVBoxLayout()
         control_panel.setSpacing(10)
         
-        # Блок Цветов
         colors_box = QWidget()
         colors_box.setStyleSheet("background-color: #12162d; border: 1px solid #3c445c; border-radius: 6px; padding: 8px;")
         colors_layout = QVBoxLayout(colors_box)
@@ -148,7 +146,6 @@ class FractalApp(QMainWindow):
         colors_layout.addWidget(self.btn_rand_col)
         control_panel.addWidget(colors_box)
         
-        # Блок Геометрии
         geo_box = QWidget()
         geo_box.setStyleSheet("background-color: #12162d; border: 1px solid #3c445c; border-radius: 6px; padding: 8px;")
         geo_layout = QVBoxLayout(geo_box)
@@ -178,7 +175,6 @@ class FractalApp(QMainWindow):
         geo_layout.addWidget(self.btn_rand_geo)
         control_panel.addWidget(geo_box)
         
-        # Блок Экспорта
         export_box = QWidget()
         export_box.setStyleSheet("background-color: #12162d; border: 1px solid #3c445c; border-radius: 6px; padding: 8px;")
         export_layout = QVBoxLayout(export_box)
@@ -221,7 +217,6 @@ class FractalApp(QMainWindow):
         self.stats_label.setStyleSheet("color: #28a745; background-color: #12162d; border: 1px solid #3c445c; border-radius: 4px; padding: 6px; font-weight: bold; qproperty-alignment: AlignCenter;")
         control_panel.addWidget(self.stats_label)
         
-        # Правая часть холста Matplotlib
         self.fig, self.ax = plt.subplots(figsize=(5.4, 9.6), dpi=100, facecolor='none')
         self.ax.set_facecolor('none')
         self.lc = LineCollection([], linewidths=0.5)
@@ -237,7 +232,6 @@ class FractalApp(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
         
-        # Привязка событий
         self.preset_combo.currentTextChanged.connect(self.on_preset_changed)
         self.res_combo.currentTextChanged.connect(self.trigger_update)
         self.w_n.textChanged.connect(self.trigger_update)
@@ -308,6 +302,7 @@ class FractalApp(QMainWindow):
             rgb = np.power(lengths, g)[:, np.newaxis] + amp[:, np.newaxis] * (matrix @ vec).T
             rgb = np.clip(rgb, 0.0, 1.0)
             
+            # ИСПРАВЛЕНО: Предотвращение tuple ошибки в PyQt-приложении
             rgba = np.zeros((rgb.shape[0], 4))
             rgba[:, :3] = rgb
             rgba[:, 3] = o
