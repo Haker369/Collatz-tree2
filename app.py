@@ -181,7 +181,7 @@ class FractalApp(ctk.CTk):
         self.btn_reset = ctk.CTkButton(actions_frame, text="Сброс", fg_color="#dc3545", hover_color="#c82333", font=("Arial", 11, "bold"), command=self.reset_to_defaults)
         self.btn_reset.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0))
 
-        # Статистика (ИСПРАВЛЕНО: удалены неподдерживаемые border_color и border_width)
+        # Статистика
         self.stats_label = ctk.CTkLabel(self.left_panel, text="Линий на экране: 0", font=("Arial", 11, "bold"), text_color="#28a745", fg_color="#12162d", corner_radius=4, height=30)
         self.stats_label.pack(fill=tk.X)
 
@@ -261,7 +261,8 @@ class FractalApp(ctk.CTk):
             rgb = np.power(lengths, g)[:, np.newaxis] + amp[:, np.newaxis] * (matrix @ vec).T
             rgb = np.clip(rgb, 0.0, 1.0)
             
-            rgba = np.zeros((rgb.shape, 4))
+            # ИСПРАВЛЕНО: rgb.shape[0] извлекает число строк как целое число, убирая конфликт с tuple
+            rgba = np.zeros((rgb.shape[0], 4))
             rgba[:, :3] = rgb
             rgba[:, 3] = o
             all_colors.append(rgba)
