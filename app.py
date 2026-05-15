@@ -108,6 +108,12 @@ class FractalApp(ctk.CTk):
         self.is_updating_preset = False
         self.controls = {}
 
+        # Внутренняя функция добавления контроллеров степперов
+        def add_ctrl(master, key, label, val, mn, mx):
+            ctrl = HybridControl(master, label, val, mn, mx, self.trigger_update)
+            ctrl.pack(fill=tk.X, padx=10, pady=2)
+            self.controls[key] = ctrl
+
         # 1. Панель цветов
         colors_box = ctk.CTkFrame(self.left_panel, fg_color="#12162d", border_color="#3c445c", border_width=1, corner_radius=6)
         colors_box.pack(fill=tk.X, pady=(0, 10), ipady=8, ipadx=8)
@@ -119,11 +125,6 @@ class FractalApp(ctk.CTk):
         ctk.CTkLabel(p_frame, text="Готовый пресет:", font=("Arial", 11, "bold"), text_color="#8189a2").pack(side=tk.LEFT)
         self.preset_combo = ctk.CTkComboBox(p_frame, values=['Стандарт', 'Радуга', 'Киберпанк', 'Огонь'], width=180, fg_color="#1b203e", border_color="#3c445c", command=self.on_preset_changed)
         self.preset_combo.pack(side=tk.RIGHT)
-
-        def add_ctrl(master, key, label, val, mn, mx):
-            ctrl = HybridControl(master, label, val, mn, mx, self.trigger_update)
-            ctrl.pack(fill=tk.X, padx=10, pady=2)
-            self.controls[key] = ctrl
         
         add_ctrl(colors_box, 's', 'Сдвиг спектра', 249, 0, 300)
         add_ctrl(colors_box, 'r', 'Вращение цвета', 76, 0, 500)
@@ -165,7 +166,7 @@ class FractalApp(ctk.CTk):
         res_frame.pack(fill=tk.X, padx=10, pady=4)
         ctk.CTkLabel(res_frame, text="Разрешение кадра:", font=("Arial", 11, "bold"), text_color="#8189a2").pack(side=tk.LEFT)
         self.res_combo = ctk.CTkComboBox(res_frame, values=['FullHD (1080x1920)', '2K (1440x2560)', '4K (2160x3840)'], width=180, fg_color="#1b203e", border_color="#3c445c", command=lambda v: self.trigger_update())
-        self.res_combo.pack(side=tk.RIGHT) # ИСПРАВЛЕНО: Qt.RIGHT заменён на tk.RIGHT
+        self.res_combo.pack(side=tk.RIGHT) 
 
         fmt_frame = ctk.CTkFrame(export_box, fg_color="transparent")
         fmt_frame.pack(fill=tk.X, padx=10, pady=4)
@@ -180,8 +181,8 @@ class FractalApp(ctk.CTk):
         self.btn_reset = ctk.CTkButton(actions_frame, text="Сброс", fg_color="#dc3545", hover_color="#c82333", font=("Arial", 11, "bold"), command=self.reset_to_defaults)
         self.btn_reset.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0))
 
-        # Статистика
-        self.stats_label = ctk.CTkLabel(self.left_panel, text="Линий на экране: 0", font=("Arial", 11, "bold"), text_color="#28a745", fg_color="#12162d", border_color="#3c445c", border_width=1, corner_radius=4, height=30)
+        # Статистика (ИСПРАВЛЕНО: удалены неподдерживаемые border_color и border_width)
+        self.stats_label = ctk.CTkLabel(self.left_panel, text="Линий на экране: 0", font=("Arial", 11, "bold"), text_color="#28a745", fg_color="#12162d", corner_radius=4, height=30)
         self.stats_label.pack(fill=tk.X)
 
         # График Matplotlib справа
