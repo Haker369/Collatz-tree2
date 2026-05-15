@@ -20,10 +20,12 @@ COLLATZ_CACHE = []
 
 for n in STATIC_START_NUMBERS:
     seq = [n]
-    while n != 1:
+    steps_count = 0
+    while n != 1 and steps_count < 5000:  # ИСПРАВЛЕНО: Лимит шагов предотвращает переполнение RAM (MemoryError)
         if n % 2 == 0: n //= 2
         else: n = 3 * n + 1
         seq.append(n)
+        steps_count += 1
     COLLATZ_CACHE.append(np.array(seq[::-1], dtype=float))
 
 ctk.set_appearance_mode("Dark")
@@ -98,7 +100,7 @@ class FractalApp(ctk.CTk):
 
         # Главный контейнер разметки
         self.main_container = ctk.CTkFrame(self, fg_color="transparent")
-        self.main_container.pack(fill=tk.BOTH, expand=True, padx=15, Richmond=15)
+        self.main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
 
         self.left_panel = ctk.CTkFrame(self.main_container, fg_color="transparent", width=460)
         self.left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 15))
@@ -118,14 +120,16 @@ class FractalApp(ctk.CTk):
         self.preset_combo = ctk.CTkComboBox(p_frame, values=['Стандарт', 'Радуга', 'Киберпанк', 'Огонь'], width=180, fg_color="#1b203e", border_color="#3c445c", command=self.on_preset_changed)
         self.preset_combo.pack(side=tk.RIGHT)
 
-        w = lambda master, lbl, val, mn, mx: HybridControl(master, lbl, val, mn, mx, self.trigger_update)
-        colors_box.pack_slaves()
+        def add_ctrl(master, key, label, val, mn, mx):
+            ctrl = HybridControl(master, label, val, mn, mx, self.trigger_update)
+            ctrl.pack(fill=tk.X, padx=10, pady=2)
+            self.controls[key] = ctrl
         
-        self.add_ctrl(colors_box, 's', 'Сдвиг спектра', 249, 0, 300)
-        self.add_ctrl(colors_box, 'r', 'Вращение цвета', 76, 0, 500)
-        self.add_ctrl(colors_box, 'h', 'Насыщенность', 181, 0, 300)
-        self.add_ctrl(colors_box, 'g', 'Яркость / Гамма', 130, 10, 200)
-        self.add_ctrl(colors_box, 'o', 'Прозрачность ветвей', 50, 5, 100)
+        add_ctrl(colors_box, 's', 'Сдвиг спектра', 249, 0, 300)
+        add_ctrl(colors_box, 'r', 'Вращение цвета', 76, 0, 500)
+        add_ctrl(colors_box, 'h', 'Насыщенность', 181, 0, 300)
+        add_ctrl(colors_box, 'g', 'Яркость / Гамма', 130, 10, 200)
+        add_ctrl(colors_box, 'o', 'Прозрачность ветвей', 50, 5, 100)
 
         self.btn_rand_col = ctk.CTkButton(colors_box, text="🎨 Мутировать цвет", fg_color="#17a2b8", hover_color="#138496", font=("Arial", 11, "bold"), height=28, command=self.mutate_colors)
         self.btn_rand_col.pack(fill=tk.X, padx=10, pady=(6, 2))
@@ -135,10 +139,10 @@ class FractalApp(ctk.CTk):
         geo_box.pack(fill=tk.X, pady=(0, 10), ipady=8, ipadx=8)
         
         ctk.CTkLabel(geo_box, text="Геометрия дерева", font=("Arial", 12, "bold"), text_color="white").pack(anchor="w", padx=10, pady=4)
-        self.add_ctrl(geo_box, 'e', 'Масштаб длины', 130, 10, 250)
-        self.add_ctrl(geo_box, 'a', 'Угол ветвления', 19, 1, 100)
-        self.add_ctrl(geo_box, 'f', 'Смещение кроны', 70, 0, 200)
-        self.add_ctrl(geo_box, 'lw', 'Толщина линий', 40, 2, 300)
+        add_ctrl(geo_box, 'e', 'Масштаб длины', 130, 10, 250)
+        add_ctrl(geo_box, 'a', 'Угол ветвления', 19, 1, 100)
+        add_ctrl(geo_box, 'f', 'Смещение кроны', 70, 0, 200)
+        add_ctrl(geo_box, 'lw', 'Толщина линий', 40, 2, 300)
 
         rays_frame = ctk.CTkFrame(geo_box, fg_color="transparent")
         rays_frame.pack(fill=tk.X, padx=10, pady=4)
@@ -161,7 +165,7 @@ class FractalApp(ctk.CTk):
         res_frame.pack(fill=tk.X, padx=10, pady=4)
         ctk.CTkLabel(res_frame, text="Разрешение кадра:", font=("Arial", 11, "bold"), text_color="#8189a2").pack(side=tk.LEFT)
         self.res_combo = ctk.CTkComboBox(res_frame, values=['FullHD (1080x1920)', '2K (1440x2560)', '4K (2160x3840)'], width=180, fg_color="#1b203e", border_color="#3c445c", command=lambda v: self.trigger_update())
-        self.res_combo.pack(side=tk.RIGHT)
+        self.res_combo.pack(side=Qt.RIGHT)
 
         fmt_frame = ctk.CTkFrame(export_box, fg_color="transparent")
         fmt_frame.pack(fill=tk.X, padx=10, pady=4)
@@ -187,7 +191,7 @@ class FractalApp(ctk.CTk):
         self.fig, self.ax = plt.subplots(figsize=(5.4, 9.6), dpi=100, facecolor='none')
         self.ax.set_facecolor('none')
         self.lc = LineCollection([], linewidths=0.5)
-        self.ax.add_collection(self.lc)
+        self.ax.add_collection(lc)
         self.ax.axis('off')
         self.fig.subplots_adjust(top=1, bottom=0, right=1, left=0)
 
@@ -196,11 +200,6 @@ class FractalApp(ctk.CTk):
         self.canvas.get_tk_widget().configure(bg="#0b0d19", highlightthickness=0)
 
         self.trigger_update()
-
-    def add_ctrl(self, master, key, label, val, mn, mx):
-        ctrl = w(master, label, val, mn, mx)
-        ctrl.pack(fill=tk.X, padx=10, pady=2)
-        self.controls[key] = ctrl
 
     def trigger_update(self):
         if self.is_updating_preset: return
