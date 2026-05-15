@@ -21,14 +21,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install numpy==1.26.4 matplotlib==3.8.4 PyQt5==5.15.10 pyinstaller==6.6.0
 
-    - name: Compile with PyInstaller
+    - name: Compile to Single EXE file
       run: |
-        pyinstaller --noconfirm --onedir --windowed --name="CollatzTree" app.py
+        pyinstaller --noconfirm --onefile --windowed --hidden-import="matplotlib.backends.backend_qt5agg" --name="CollatzTree" app.py
 
-    - name: Upload Finished Artifact
+    - name: Upload Finished EXE
       uses: actions/upload-artifact@v4
       with:
-        name: CollatzTree-Windows
-        path: dist/CollatzTree/
+        name: CollatzTree-Single-Executable
+        path: dist/CollatzTree.exe
