@@ -21,7 +21,7 @@ COLLATZ_CACHE = []
 for n in STATIC_START_NUMBERS:
     seq = [n]
     steps_count = 0
-    while n != 1 and steps_count < 5000:  # ИСПРАВЛЕНО: Лимит шагов предотвращает переполнение RAM (MemoryError)
+    while n != 1 and steps_count < 5000:  
         if n % 2 == 0: n //= 2
         else: n = 3 * n + 1
         seq.append(n)
@@ -85,9 +85,9 @@ class HybridControl(ctk.CTkFrame):
         return self.slider.get()
 
     def update_indicator(self, val):
-        if abs(val - self.min_v) < 0.1: color = "#dc3545" # Красный
-        elif abs(val - self.max_v) < 0.1: color = "#28a745" # Зеленый
-        else: color = "#ffc107" # Желтый
+        if abs(val - self.min_v) < 0.1: color = "#dc3545" 
+        elif abs(val - self.max_v) < 0.1: color = "#28a745" 
+        else: color = "#ffc107" 
         self.indicator.itemconfigure(self.indicator_circle, fill=color)
 
 
@@ -165,7 +165,7 @@ class FractalApp(ctk.CTk):
         res_frame.pack(fill=tk.X, padx=10, pady=4)
         ctk.CTkLabel(res_frame, text="Разрешение кадра:", font=("Arial", 11, "bold"), text_color="#8189a2").pack(side=tk.LEFT)
         self.res_combo = ctk.CTkComboBox(res_frame, values=['FullHD (1080x1920)', '2K (1440x2560)', '4K (2160x3840)'], width=180, fg_color="#1b203e", border_color="#3c445c", command=lambda v: self.trigger_update())
-        self.res_combo.pack(side=Qt.RIGHT)
+        self.res_combo.pack(side=tk.RIGHT) # ИСПРАВЛЕНО: Qt.RIGHT заменён на tk.RIGHT
 
         fmt_frame = ctk.CTkFrame(export_box, fg_color="transparent")
         fmt_frame.pack(fill=tk.X, padx=10, pady=4)
@@ -191,7 +191,7 @@ class FractalApp(ctk.CTk):
         self.fig, self.ax = plt.subplots(figsize=(5.4, 9.6), dpi=100, facecolor='none')
         self.ax.set_facecolor('none')
         self.lc = LineCollection([], linewidths=0.5)
-        self.ax.add_collection(lc)
+        self.ax.add_collection(self.lc)
         self.ax.axis('off')
         self.fig.subplots_adjust(top=1, bottom=0, right=1, left=0)
 
@@ -260,7 +260,7 @@ class FractalApp(ctk.CTk):
             rgb = np.power(lengths, g)[:, np.newaxis] + amp[:, np.newaxis] * (matrix @ vec).T
             rgb = np.clip(rgb, 0.0, 1.0)
             
-            rgba = np.zeros((rgb.shape[0], 4))
+            rgba = np.zeros((rgb.shape, 4))
             rgba[:, :3] = rgb
             rgba[:, 3] = o
             all_colors.append(rgba)
